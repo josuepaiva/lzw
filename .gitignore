@@ -8,3 +8,5 @@ idea/
 .DS_Store
 DS_Store
 dependency-reduced-pom.xml
+*.txt
+*.lzw

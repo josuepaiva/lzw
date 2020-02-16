@@ -5,7 +5,9 @@ import com.sun.javafx.binding.StringFormatter;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Hello world!
@@ -16,59 +18,34 @@ public class App
     private static final int TAMINDICE = 9;
 
     public static void main( String[] args ){
-        int num = 121;
-        long chunck;
-        int BUFFER_SIZE = 4096, cursor = 0;
-        byte[] bytesBuffer = new byte[BUFFER_SIZE];
-        int bytes = 0;
 
+        int BUFFER_SIZE;
+        int tamanho = 0;
+        int offset = 0;
+        int cursor = 0;
+        int byteslidos = 0;
+        String nome = "";
+        StringBuilder stringbuild = new StringBuilder();
         BufferedInputStream buffer;
+        byte [] bytes = new byte[1];
+        List<Character> listchar = new ArrayList<>();
+        byte value;
         ByteBuffer bbytes;
+
         try {
-            FileInputStream file = new FileInputStream("sample.mp4");
+            FileInputStream file = new FileInputStream("test.txt");
             buffer = new BufferedInputStream(file);
 
-            buffer.read(bytesBuffer);
-            bbytes = ByteBuffer.wrap(bytesBuffer);
-            bbytes.order(ByteOrder.BIG_ENDIAN);
+            while( (byteslidos = file.read(bytes)) != -1) {
+                char aux = (char) bytes[0];
+                listchar.add(aux);
+            }
 
             Lzw lzw = new Lzw();
-            lzw.compress("WYS*WYGWYS*WYSWYSG");
-            lzw.decode();
-//            while (( bytes = buffer.read(bytesBuffer)) > 0) {
-//                bbytes = ByteBuffer.wrap(bytesBuffer);
-//                for(int i=0; i<bytes; i++) {
-//
-//                    switch (TAMINDICE){
-//                        case 9:
-//                            short v = bbytes.getShort();
-//
-//                            break;
-//                        case 10:
-//                            break;
-//                        case 11:
-//                            break;
-//                        case 12:
-//                            break;
-//                        case 13:
-//                            break;
-//                        case 14:
-//                            break;
-//                        case 15:
-//                            break;
-//                        case 16:
-//                            break;
-//                        default:
-//                            System.out.println("Deu errado aqui");
-//
-//
-//                    }
-//
-//                }
-//            }
+//            lzw.compress("WYS*WYGWYS*WYSWYSG");
+            lzw.compress(listchar);
 
-
-
+//            lzw.decode();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

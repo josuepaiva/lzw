@@ -1,5 +1,7 @@
 package org.example;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +12,57 @@ public class Lzw {
     private HashMap<String, Integer> dicionarioCode;
     private HashMap<Integer, String> dicionarioDecode;
     private List<Integer> saida;
+    private FileOutputStream saidacode;
+    private FileLzw fileLzw;
+
+    private final int TAMDICIONARIO = 265;
+    private final int NBITS = 9;
 
     public Lzw(){
-        dicionarioCode = new HashMap<>();
+        dicionarioCode = new HashMap<>(TAMDICIONARIO);
         dicionarioDecode = new HashMap<>();
         saida = new ArrayList<>();
         saidaString = new StringBuilder();
+        fileLzw = new FileLzw();
         initDicionario();
+    }
+
+    public void compress(List<Character> array) throws IOException {
+        System.out.println("/------Codificando-----/");
+        int code = 256;
+        String p ="";
+        String c ="";
+        p += array.get(0);
+        char [] arraychar = converteArray(array);
+        System.out.println("/------Percorrendo array-----/");
+        for(int i = 0; i < arraychar.length; i++){
+            System.out.println("Faltam "+(arraychar.length - i)+" interações");
+            if(i != arraychar.length - 1){
+                c += arraychar[i + 1];
+            }
+            if(dicionarioCode.containsKey(p+c)){
+                System.out.println("Valor "+(p+c)+" esta no dicionario");
+                p = p + c;
+                System.out.println("P "+(p));
+            }else {
+                if(dicionarioCode.size() == TAMDICIONARIO) {
+//                    System.out.println("Dicionário cheio");
+                    p = p + c;
+                }else {
+                    fileLzw.addBits(dicionarioCode.get(p), NBITS);
+                    saida.add(dicionarioCode.get(p));
+                    dicionarioCode.put(p+c,code);
+                    code++;
+                    p = c;
+                }
+            }
+            c = "";
+
+        }
+        saida.add(dicionarioCode.get(p));
+//        fileLzw.addBits(dicionarioCode.get(p), NBITS);
+        fileLzw.salvaFim();
+//        mostraSaida();
     }
 
     public void compress(String dados){
@@ -36,15 +82,22 @@ public class Lzw {
             if(dicionarioCode.containsKey(p+c)){
                 p = p + c;
             }else {
-                saida.add(dicionarioCode.get(p));
-                dicionarioCode.put(p+c,code);
-                code++;
-                p = c;
+                if(dicionarioCode.size() == TAMDICIONARIO) {
+                    p = p + c;
+                }else {
+                    saida.add(dicionarioCode.get(p));
+
+                    dicionarioCode.put(p+c,code);
+                    code++;
+                    p = c;
+                }
             }
             c = "";
+
         }
+        System.out.println("/------Terminou de ler o array-----/");
         saida.add(dicionarioCode.get(p));
-        mostraSaida();
+//        mostraSaida();
     }
 
     private void initDicionario(){
@@ -97,4 +150,14 @@ public class Lzw {
             System.out.println(aux);
         }
     }
+
+    private char[] converteArray(List<Character> list){
+        char[] myCharArray = new char[list.size()];
+        for(int i = 0; i < list.size(); i++) {
+            myCharArray[i] = list.get(i);
+        }
+        return myCharArray;
+    }
+
+    private void salvaArquivo(){}
 }
