@@ -1,24 +1,49 @@
 package org.example;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 public class FileLzw {
-    private FileOutputStream saida;
     private final int SIZE = 6;
     private byte pos = 0;
     private char [] buffer;
     private OutputStream file;
+    DataOutputStream dataOut;
 
     public FileLzw() {
         buffer = new char[SIZE];
         try {
-            file =  new FileOutputStream("saida.lzw");
+//            file =  new FileOutputStream("saida.lzw");
+            dataOut = new DataOutputStream(new FileOutputStream("saida.lzw"));
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public FileLzw(String path) {
+        buffer = new char[SIZE];
+        try {
+//            file =  new FileOutputStream(path);
+            dataOut = new DataOutputStream(new FileOutputStream(path));
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public void salvaBytes(String string, int qbits) throws IOException {
+//        file.write(string.getBytes(), 0,string.length());
+//        file.write(string.getBytes());
+        dataOut.write(string.getBytes());
+//        file.flush();
+    }
+
+    public void salvaBytesCompress(int indice) throws IOException {
+        if(dataOut == null){
+            System.out.println("daaout null");
+        }
+        dataOut.writeInt(indice);
+        dataOut.flush();
     }
 
     public void addBits(int value, int qbits) throws IOException {
@@ -66,8 +91,10 @@ public class FileLzw {
         String aux = new String(buffer);
 
         if (bytes >= SIZE - 3) {
-            file.write(aux.getBytes(), 1, bytes);
-            file.flush();
+//            file.write(aux.getBytes(), 1, bytes);
+            dataOut.write(aux.getBytes(), 1, bytes);
+            System.out.println("Quantidade de bytes salva "+dataOut.size());
+//            file.flush();
             //printf("salvei %d bytes\n", byte);
             pos -= bytes * 8;
             shift = pos % 8; // quant de bits utilizados
@@ -85,11 +112,39 @@ public class FileLzw {
         if (shift > 0)
             bytes++;
         if (bytes > 0) {
-            file.write(aux.getBytes(), 1, bytes);
-            file.flush();
+//            file.write(aux.getBytes(), 1, bytes);
+            dataOut.write(aux.getBytes(), 1, bytes);
+//            file.flush();
             //printf("salvei fim %d bytes\n", byte);
         }
 
-        file.close();
+    }
+
+    public void closeFile() throws IOException {
+        dataOut.close();
+    }
+
+    private void writeChunk(int codeword, DataOutputStream out, int nbits) throws IOException {
+        byte [] buffer = new byte[2]; // n = 10
+        // 1 byte + 2 buffer minimo 2 byte
+
+
+        byte bufferSize = 0;
+
+        if (bufferSize == 0) {
+            // this will be the first chunk to be written to buffer
+            buffer[0] = (byte)(codeword >>> 4);  // use >>> to prevent sign extension; same as (& 0x7F)
+            buffer[0] = (byte)(codeword >>> 4);  // use >>> to prevent sign extension; same as (& 0x7F)
+            buffer[1] = (byte)(codeword << 4);  // only put the remaining 4 bits at front of buffer[1]
+            bufferSize++;
+        } else {
+            // this is the second chunk
+            buffer[1] = (byte)(buffer[1] | (codeword >>> 8));
+            buffer[2] = (byte)(codeword);  // the higher 4 bits will be chopped off from codeword using byte casting
+            for (byte b : buffer) {
+                out.writeByte(b);
+            }
+            bufferSize = 0;  // reset buffer
+        }
     }
 }

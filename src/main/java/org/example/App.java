@@ -16,41 +16,61 @@ import java.util.List;
 public class App 
 {
     private static final int TAMINDICE = 9;
+    private static final String video = "sample.mp4";
+    private static final String textoTest = "test.txt";
+    private static final String textProfessor = "corpus16MB.txt";
 
     public static void main( String[] args ){
 
-        int BUFFER_SIZE;
-        int tamanho = 0;
-        int offset = 0;
-        int cursor = 0;
         int byteslidos = 0;
-        String nome = "";
-        StringBuilder stringbuild = new StringBuilder();
-        BufferedInputStream buffer;
+
         byte [] bytes = new byte[1];
         List<Character> listchar = new ArrayList<>();
-        byte value;
-        ByteBuffer bbytes;
 
         try {
-            FileInputStream file = new FileInputStream("test.txt");
-            buffer = new BufferedInputStream(file);
+            FileInputStream file = new FileInputStream(textoTest);
+            DataInputStream entrada = new DataInputStream(new BufferedInputStream(file));
 
-            while( (byteslidos = file.read(bytes)) != -1) {
-                char aux = (char) bytes[0];
-                listchar.add(aux);
+            while (true){
+                byte valor = entrada.readByte();
+                listchar.add((char)valor);
             }
 
-            Lzw lzw = new Lzw();
-//            lzw.compress("WYS*WYGWYS*WYSWYSG");
-            lzw.compress(listchar);
+//            while( (byteslidos = file.read(bytes)) != -1) {
+//                char aux = (char) bytes[0];
+//                listchar.add(aux);
+//            }
 
-//            lzw.decode();
+//            FileLzw gravar = new FileLzw();
+//            gravar.addBits(20, 9);
+//            gravar.addBits(30, 9);
+//            gravar.addBits(80, 9);
+//            gravar.addBits(200, 9);
+//            gravar.salvaFim();
+
+//            LzwDecoder lzwDecoder = new LzwDecoder("saida.lzw");
+//            lzwDecoder.decode();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (EOFException e){
+//            System.out.println("Byte erro");
+//            System.out.println(listchar.get(35));
+            Lzw lzw = new Lzw();
+            try {
+                lzw.compress(listchar);
+                LzwDecoder lzwDecoder = new LzwDecoder("saida.lzw");
+                lzwDecoder.decode();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
+
+
+
     }
 
     public static String getString(ByteBuffer bbytes, int tam){
