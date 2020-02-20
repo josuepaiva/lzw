@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class LzwDecoder implements LzwDecoderI{
+public class LzwDecoderNovo implements LzwDecoderI {
     private String path;
     private StringBuilder saidaString;
     private HashMap<Integer, String> dicionarioDecode;
@@ -15,14 +15,14 @@ public class LzwDecoder implements LzwDecoderI{
     private final int TAMDICIONARIO;
 
 
-    public LzwDecoder(String caminho, int n){
-        NBITS = n;
-        TAMDICIONARIO = (int) Math.pow(2,NBITS);
-        dicionarioDecode = new HashMap<>(TAMDICIONARIO);
+    public LzwDecoderNovo(String caminho, int n){
         listadecode = new ArrayList<>();
         saidaString = new StringBuilder();
         fileLzw = new FileLzw("arqDecodificado.txt");
         path = caminho;
+        NBITS = n;
+        TAMDICIONARIO = (int) Math.pow(2,NBITS);
+        dicionarioDecode = new HashMap<>(TAMDICIONARIO);
         initDicionario();
     }
 
@@ -73,23 +73,37 @@ public class LzwDecoder implements LzwDecoderI{
     }
 
     public void preparaArray() {
+        int resto = 0;
+        int result = 0;
+        byte byte1 = 0;
+        byte byte2 = 0;
+        byte byte3 = 0;
 
-        DataInputStream entrada = null;
-        try {
-            entrada = (new DataInputStream(new FileInputStream(this.path)));
+        try( DataInputStream entrada = new DataInputStream(new BufferedInputStream(new FileInputStream(this.path)))){
 
-            int value = 0;
-            int tamanho = entrada.available()  / 4;// divide por 4 porque o int tem 4 bytes
+            byte1 = entrada.readByte();
+            byte2 = entrada.readByte();
 
-            for(int i = 0 ; i < tamanho; i++){
-                value = entrada.readInt();
-                listadecode.add(value);
-                System.out.println(value);
+            result = (result | byte1);
+            result = result << NBITS - 8 | byte2 >> ((NBITS - 8) - 8) * -1;
+            listadecode.add(result);
+            resto = byte2 << NBITS - 8;
+
+            while (true){
+                byte3 = entrada.readByte();
+
+                resto = resto << NBITS - 8;
+                result = result << NBITS - 8 | byte3 >> ((NBITS - 8) - 8) * -1;
+                listadecode.add(result);
+                resto = byte3 << NBITS - 8;
             }
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
+        } catch (EOFException e){
+            result = byte3 << NBITS - 8;
+            listadecode.add(result);
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
         }
     }
 

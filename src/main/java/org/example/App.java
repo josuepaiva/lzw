@@ -1,16 +1,12 @@
 package org.example;
 
-import com.sun.javafx.binding.StringFormatter;
-
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
- * Hello world!
+ * Compressor LZW
  *
  */
 public class App 
@@ -21,7 +17,6 @@ public class App
     private static final String textProfessor = "corpus16MB.txt";
 
     public static void main( String[] args ){
-
         int byteslidos = 0;
 
         byte [] bytes = new byte[1];
@@ -54,12 +49,10 @@ public class App
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (EOFException e){
-//            System.out.println("Byte erro");
-//            System.out.println(listchar.get(35));
-            Lzw lzw = new Lzw();
+            LzwEncoderI lzw = new LzwEncoder(listchar);
             try {
-                lzw.compress(listchar);
-                LzwDecoder lzwDecoder = new LzwDecoder("saida.lzw");
+                lzw.compress();
+                LzwDecoderI lzwDecoder = new LzwDecoder("saida.lzw", TAMINDICE);
                 lzwDecoder.decode();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -68,9 +61,6 @@ public class App
         catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
     }
 
     public static String getString(ByteBuffer bbytes, int tam){

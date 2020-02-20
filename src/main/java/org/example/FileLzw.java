@@ -31,7 +31,7 @@ public class FileLzw {
         }
     }
 
-    public void salvaBytes(String string, int qbits) throws IOException {
+    public void salvaBytes(String string) throws IOException {
 //        file.write(string.getBytes(), 0,string.length());
 //        file.write(string.getBytes());
         dataOut.write(string.getBytes());
