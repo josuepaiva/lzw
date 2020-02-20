@@ -50,6 +50,14 @@
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifest>
+<!--                <addClasspath>true</addClasspath>-->
+                <mainClass>org.example.App</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
           <version>3.0.2</version>
         </plugin>
         <plugin>
