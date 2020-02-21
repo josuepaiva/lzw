@@ -4,7 +4,7 @@ LZW is a data compression algorithm, derived from the LZ78 algorithm, based on t
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Use the [maven](http://maven.apache.org/download.cgi) for generate a jar file.
 
 ```bash
 mvn package
